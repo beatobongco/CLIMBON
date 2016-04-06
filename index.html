@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ClimbON - beatobongco.com</title>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.0.0/normalize.min.css">
+</head>
+<body>
+  <h1>ClimbON</h1>
+  <h3>Climbing workout generator</h3>
+  <p>Training program based on Eric Horst's
+    <a href="https://books.google.com.ph/books?id=hyQCxruA7UIC&pg=PA105&lpg=PA105&dq=climbing+below+your+grade&source=bl&ots=U35HAsNbUF&sig=nJnS5rDXqg9JO6ljNlU2Vm5fSy4&hl=en&sa=X&ved=0ahUKEwi_4d_fi-_LAhUBFJQKHXGbB1MQ6AEITzAL#v=onepage&q=climbing%20below%20your%20grade&f=false">How to Climb 5.12</a>
+    and
+    <a href="https://books.google.com.ph/books?id=SfK_UcWPHigC&pg=PA42&lpg=PA42&dq=climbing+below+your+grade&source=bl&ots=szGMaGDAHa&sig=0-2_0tQaYHgeYwyPoz-8Qe06gyY&hl=en&sa=X&ved=0ahUKEwi_4d_fi-_LAhUBFJQKHXGbB1MQ6AEILzAD#v=onepage&q=climbing%20below%20your%20grade&f=false">Learning to Climb Indoors</a>
+  </p>
+  <small>Disclaimer: This should be ignored by more experienced climbers. This is not the most efficient way to train. This is just the intersection of what's fun and what's effective for me.</small>
+  <form>
+    <span>Highest gym grade climbed:</span>
+    <input type="text" name="g" class="highest-grade" />
+    <button type="submit" class="get-workout">Go</button>
+  </form>
+  <pre class="workout"></pre>
+  <script type="text/javascript" src="js/lib/multiline.js"></script>
+  <script type="text/javascript" src="js/multiplace.js"></script>
+  <script type="text/javascript">
+    function $(q) {
+      e = document.querySelectorAll(q)
+      if (e.length === 0) {
+        return null
+      }
+      else if (e.length === 1) {
+        return e[0]
+      }
+
+      return e
+    }
+
+    function getParameterByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)", "i"),
+          results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    function limit(n) {
+      return Math.max(0, Math.min(n, grades.length - 1))
+    }
+
+    function generateGrades() {
+      var g = []
+      var base = "5."
+      var letterGrades = ['a', 'b', 'c', 'd']
+
+      for (var i = 7; i <= 15; i++) {
+        if ([7, 8, 9].indexOf(i) > -1) {
+          g.push(base + i)
+        }
+        else {
+          for (var j = 0; j < letterGrades.length; j++) {
+            g.push(base + i + letterGrades[j])
+          }
+        }
+      }
+
+      return g
+    }
+
+    function getGrade(i, n) {
+      return grades[limit(i + n)]
+    }
+
+    var grades = generateGrades()
+
+    window.onload = function() {
+      var g = getParameterByName('g')
+      var i = grades.indexOf(g)
+      var legend = {
+        "-3": getGrade(i, -3),
+        "-2": getGrade(i, -2),
+        "-1": getGrade(i, -1),
+        "atLevel": getGrade(i, 0),
+        "+1": getGrade(i, 1),
+      }
+
+      $('.highest-grade').value = g
+
+      if (i > -1) {
+        $('.workout').innerText = multiplace(function() {/*
+          Your workout:
+          Warm up: 8x (2 grades or below)
+            {-3} 4 x 1
+            {-2} 2 x 2
+          Project: 7x (hardest or 1 higher)
+            {atLevel} or {+1}
+              3 falls ONLY x 2 sets
+              1 x redpoint attempt
+          Finisher: 6+ (within 1 grade only)
+            {atLevel} 1 x 1 (if applicable)
+            {-1} 2 x 3 minimum, as many sets possible
+        */}, legend)
+      }
+      else {
+        var errText = "Please select a valid grade. Here's a list to help you out:"
+
+        for (var j = 0; j < grades.length; j++) {
+          errText += grades[j]
+        }
+
+        $('.workout').innerText = errText
+      }
+    }
+  </script>
+</body>
+</html>
